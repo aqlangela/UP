@@ -20,6 +20,7 @@ class Index:
     # implement
     def add_msg(self, m):
         self.msgs.append(m)
+        self.total_msgs += 1
         
     def add_msg_and_index(self, m):
         self.add_msg(m)
@@ -48,11 +49,13 @@ class Index:
         msgs = []
         indexes = []
         if term in self.index.keys():
-            index = self.index[term]
+            indexes = self.index[term]
         else:
             return "No results found."
         for index in indexes:
-            msgs.append(self.get_msg(index))
+            new_t = (index, self.get_msg(index))
+            if new_t not in msgs:
+                msgs.append(new_t)
         return msgs
 
 
@@ -67,13 +70,9 @@ class PIndex(Index):
         # Implement: 1) open the file for reading, then call
         # the base class's add_msg_and_index
     def load_poems(self):
-        lines = open("AllSonnets.txt", "r").readlines()
-        n_lines = []
+        lines = open(self.name, 'r').readlines()
         for l in lines:
-            l = l.rstrip("\n")
-            n_lines.append(l)
-        for nl in n_lines:
-            self.add_msg_and_index(nl)
+            self.add_msg_and_index(l.strip())
     
         # Implement: p is an integer, get_poem(1) returns a list,
         # each item is one line of the 1st sonnet
@@ -95,7 +94,7 @@ class PIndex(Index):
             for j in range(s_num, e_num):
                 poem.append(self.get_msg(j))
         else:
-            raise ValueError("Index out of range")
+            return "Index out of range"
         return poem
 
 if __name__ == "__main__":
@@ -103,7 +102,7 @@ if __name__ == "__main__":
     # You are encouraged to add to this and create your own tests!
     # Call your functions as you implement them and see if they work
     sonnets = PIndex("AllSonnets.txt")
-    p3 = sonnets.get_poem(3)
-    print(p3)
-    s_love = sonnets.search("love")
-    print(s_love)
+    p154 = sonnets.get_poem(154)
+    print(p154)
+    s_five = sonnets.search("five")
+    print(s_five)
