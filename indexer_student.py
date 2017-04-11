@@ -29,12 +29,14 @@ class Index:
 
     # implement
     def indexing(self, m, l):
+        punc = "!?:;,."
         words = m.split(" ")
         for word in words:
+            word = word.strip(punc)
             try:
-                self.index[word].append(l)
+                self.index[word.lower()].append(l)
             except:
-                self.index[word] = [l]
+                self.index[word.lower()] = [l]
         
     # implement: query interface
     '''
@@ -47,18 +49,34 @@ class Index:
     '''                      
     def search(self, term):
         msgs = []
+        t_msgs = []
         indexes = []
-        if term in self.index.keys():
-            indexes = self.index[term]
+
+        words = term.split()
+        #phrase search
+        if len(words) > 1:
+            for word in words:
+                t_msgs.append(self.search(word))
+            for i in range(1, len(words)):
+                for j in range(len(t_msgs[0])):
+                    if t_msgs[0][j] in t_msgs[i]:
+                        msgs.append(t_msgs[0][j])
+            if msgs == []:
+                return "No results found."
+        #single word search
         else:
-            return "No results found."
-        for index in indexes:
-            new_t = (index, self.get_msg(index))
-            if new_t not in msgs:
-                msgs.append(new_t)
+            if term in self.index.keys():
+                indexes = self.index[term]
+            else:
+                return "No results found."
+            for index in indexes:
+                new_t = (index, self.get_msg(index))
+                if new_t not in msgs:
+                    msgs.append(new_t)
+                    
         return msgs
-
-
+        
+            
 class PIndex(Index):
     def __init__(self, name):
         super().__init__(name)
@@ -104,5 +122,16 @@ if __name__ == "__main__":
     sonnets = PIndex("AllSonnets.txt")
     p154 = sonnets.get_poem(154)
     print(p154)
+    
     s_five = sonnets.search("five")
     print(s_five)
+    
+    p_fh = sonnets.search("five hundred")
+    print(p_fh)
+    
+    p_ie = sonnets.search("i eat")
+    print(p_ie)
+    
+    p1 = PIndex("p1.txt")
+    s_thy = p1.search("thy")
+    print(s_thy)
