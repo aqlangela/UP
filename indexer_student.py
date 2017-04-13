@@ -71,6 +71,7 @@ class Index:
                 return "No results found."
             for index in indexes:
                 new_t = (index, self.get_msg(index))
+                #remove dublicates
                 if new_t not in msgs:
                     msgs.append(new_t)
                     
