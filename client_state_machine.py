@@ -46,7 +46,6 @@ class ClientSM:
         msg = M_DISCONNECT
         mysend(self.s, msg)
         self.out_msg += 'You are disconnected from ' + self.peer + '\n'
-        self.peer = ''
 
     def proc(self, my_msg, peer_code, peer_msg):
         # message from user is in my_msg, if it has an argument (e.g. "p 3")
@@ -63,6 +62,7 @@ class ClientSM:
                 
                 if my_msg == 'q':
                     self.out_msg += 'See you next time!\n'
+                    self.out_msg = "  "
                     self.state = S_OFFLINE
                     
                 elif my_msg == 'time':
@@ -71,27 +71,40 @@ class ClientSM:
                     self.out_msg += "Time is: " + time_in
                             
                 elif my_msg == 'who':
-                    pass
+                    mysend(self.s, M_LIST)
+                    peer = myrecv(self.s)
+                    self.out_msg += "All the users and their group info: "
+                    self.out_msg += peer
                             
                 elif my_msg[0] == 'c':
                     peer = my_msg[1:]
                     peer = peer.strip()
-                    pass
+                    user = self.connect_to(peer)
+                    self.peer = peer
+                    self.state = S_CHATTING
                         
                 elif my_msg[0] == '?':
                     term = my_msg[1:].strip()
-                    pass
+                    mysend(self.s, M_SEARCH + term)
+                    m = myrecv(self.s)
+                    if m.isdigit():
+                        self.out_msg += "No results found."
+                    else:
+                        self.out_msg += "The messages are: \n%s" % m[1:]
                         
                 elif my_msg[0] == 'p':
                     poem_idx = my_msg[1:].strip()
-                    pass
+                    mysend(self.s, M_POEM + poem_idx)
+                    poem = myrecv(self.s)[1:]
+                    self.out_msg += "The required poem is %s." % poem
 
                 else:
                     self.out_msg += menu
                     
             if len(peer_msg) > 0:
                 if peer_code == M_CONNECT:
-                    pass
+                    self.state = S_CHATTING
+                    self.out_msg += "Connected." 
                     
 #==============================================================================
 # Start chatting, 'bye' for quit
@@ -103,20 +116,20 @@ class ClientSM:
                 if my_msg == 'bye':
                     self.disconnect()
                     self.state = S_LOGGEDIN
-                    self.peer = ''
+                    self.peer = ""
             
             if len(peer_msg) > 0:    # peer's stuff, coming in
-                pass
+                self.out_msg += peer_msg
 
             # I got bumped out
             if peer_code == M_DISCONNECT:
-                pass
+                self.state = S_LOGGEDIN
 
             # Display the menu again
             if self.state == S_LOGGEDIN:
                 self.out_msg += menu
 #==============================================================================
-# invalid state                       
+# invalid state                      
 #==============================================================================
         else:
             self.out_msg += 'How did you wind up here??\n'
@@ -133,5 +146,5 @@ B. a group of THREE
 C. no preference
 
 Fill in your A/B/C below
-My selection:
+My selection: B
 """

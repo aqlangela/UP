@@ -12,8 +12,8 @@ M_LIST      = '7'
 M_POEM      = '8'
 M_TIME      = '9'
 
-#CHAT_IP = '' #This is for MAC
-CHAT_IP = socket.gethostname() #This is for PC
+CHAT_IP = '' #This is for MAC
+#CHAT_IP = socket.gethostname() #This is for PC
 CHAT_PORT = 1112
 SERVER = (CHAT_IP, CHAT_PORT)
 
