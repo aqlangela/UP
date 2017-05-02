@@ -112,34 +112,37 @@ class Server:
                 # Finding the list of people to send to
                 the_guys = self.group.list_me(from_name)[1:]
                 for g in the_guys:
-                    to_sock = self.logged_name2sock[g]                
-                    mysend(to_sock, "...Remember to index the messages before sending, or search won't work")
+                    to_sock = self.logged_name2sock[g]
+                    self.indices[len(self.indices)] = msg              
+                    mysend(to_sock, M_EXCHANGE + msg)
 #==============================================================================
 #             listing available peers; IMPLEMENT THIS
 #==============================================================================
             elif code == M_LIST:
                 from_name = self.logged_sock2name[from_sock]
-                msg = "M_LIST handler needs to use self.group functions to work"
+                msg = self.group.list_me(from_name)[1:]
                 mysend(from_sock, msg)
 #==============================================================================
 #             retrieve a sonnet; IMPLEMENT THIS
 #==============================================================================
             elif code == M_POEM:
-                poem_indx = 0
+                poem_indx = int(msg[1:])
                 from_name = self.logged_sock2name[from_sock]
-                poem = "M_POEM handler needs to use self.sonnet functions to work"
+                poem = self.sonnet.get_sect(poem_indx)
                 mysend(from_sock, M_POEM + poem)
 #==============================================================================
 #             retrieve the time; IMPLEMENT THIS
 #==============================================================================
             elif code == M_TIME:
-                ctime = "M_TIME handler has to calc current date/time to send (use time module)"
+                ctime = time.ctime()
                 mysend(from_sock, ctime)
 #==============================================================================
 #             search handler; IMPLEMENT THIS
 #==============================================================================
             elif code == M_SEARCH:
-                search_rslt = "M_SEARCH handler needs to use self.indices search to work"
+                term = msg[1:]
+                from_name = self.logged_sock2name[from_sock]
+                search_rslt = self.indices[from_name].search(term)
                 mysend(from_sock, M_SEARCH + search_rslt)
 #==============================================================================
 #             the "from" guy has had enough (talking to "to")!
